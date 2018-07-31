@@ -1,0 +1,9 @@
+[package]
+name = "can-sim"
+version = "0.1.0"
+authors = ["Ueki Masaru <masaru.ueki@itage.co.jp>"]
+
+[dependencies]
+tokio = "*"
+tokio-timer = "*"
+futures = "*"
