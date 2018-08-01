@@ -6,23 +6,38 @@ extern crate tokio_timer;
 use tokio::io;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
-use tokio::timer::Interval;
+use tokio::timer::{self, Interval};
 use futures::future;
 
 use std::time::{Duration, Instant};
 
 fn process(mut socket: TcpStream) {
-    let f = Interval::new(Instant::now(), Duration::from_millis(5000))
-        .for_each(|instant| {
+    println!("create new process");
+    let f = Interval::new(Instant::now(), Duration::from_millis(2000))
+        .for_each(move |instant| {
             println!("fire; instant={:?}", instant);
-//            socket.poll_write(b"hoge\r\n").into_future();
+            loop {
+                match socket.write(b"hoge\r\n") {
+                    Ok(_) => break,
+                    Err(err) => {
+                        match err.kind() {
+                            // Why WouldBlock is returned at first time?
+                            std::io::ErrorKind::WouldBlock => continue,
+                            _ => {
+                                println!("");
+                                return Err(timer::Error::shutdown())
+                            }
+                        }
+                    },
+                }
+            }
             Ok(())
         })
         .map_err(|e| {
             println!("process error: {:?}", e);
         });
 
-    tokio::run(f);
+    tokio::spawn(f);
 }
 
 fn main() {
