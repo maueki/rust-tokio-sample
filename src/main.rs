@@ -3,6 +3,8 @@ extern crate tokio;
 extern crate futures;
 extern crate tokio_timer;
 
+mod packet;
+
 use tokio::io::{self, Error};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
