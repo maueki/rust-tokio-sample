@@ -6,4 +6,5 @@ authors = ["Ueki Masaru <masaru.ueki@itage.co.jp>"]
 [dependencies]
 tokio = "*"
 tokio-timer = "*"
+tokio-uds = "*"
 futures = "*"

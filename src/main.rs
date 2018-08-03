@@ -2,18 +2,19 @@ extern crate tokio;
 #[macro_use]
 extern crate futures;
 extern crate tokio_timer;
+extern crate tokio_uds;
 
 mod packet;
 
 use tokio::io::{self, Error};
-use tokio::net::{TcpListener, TcpStream};
+use tokio_uds::{UnixListener, UnixStream};
 use tokio::prelude::*;
 use tokio::timer::{self, Interval};
 use futures::future;
 
 use std::time::{Duration, Instant};
 
-fn send_data(mut socket: &TcpStream, msg: &str) -> Result<(), Error> {
+fn send_data(mut socket: &UnixStream, msg: &str) -> Result<(), Error> {
     loop {
         let msg = (msg.to_string() + &"\r\n".to_string());
         match socket.write(msg.as_bytes()) {
@@ -33,7 +34,7 @@ fn send_data(mut socket: &TcpStream, msg: &str) -> Result<(), Error> {
     Ok(())
 }
 
-fn process(mut socket: TcpStream) {
+fn process(mut socket: UnixStream) {
     println!("create new process");
     let mut msgs = vec!["hoge1", "hoge2"];
 
@@ -57,8 +58,8 @@ fn process(mut socket: TcpStream) {
 }
 
 fn main() {
-    let addr = "127.0.0.1:60000".parse().unwrap();
-    let listener = TcpListener::bind(&addr).unwrap();
+    let addr = "/tmp/can_dummy";
+    let listener = UnixListener::bind(&addr).unwrap();
 
     let server = listener.incoming().for_each(move |socket| {
         process(socket);
