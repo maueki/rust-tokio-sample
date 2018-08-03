@@ -1,4 +1,5 @@
 extern crate tokio;
+#[macro_use]
 extern crate futures;
 extern crate tokio_timer;
 extern crate tokio_uds;
@@ -9,6 +10,7 @@ extern crate serde_derive;
 
 mod packet;
 mod data;
+mod radar;
 
 use tokio::io::Error;
 use tokio_uds::{UnixListener, UnixStream};
@@ -17,47 +19,19 @@ use tokio::timer::{self, Interval};
 
 use std::time::{Duration, Instant};
 
-fn send_data(mut socket: &UnixStream, msg: &str) -> Result<(), Error> {
-    loop {
-        let msg = msg.to_string() + &"\r\n".to_string();
-        match socket.write(msg.as_bytes()) {
-            Ok(_) => break,
-            Err(err) => {
-                match err.kind() {
-                    // Why WouldBlock is returned at first time?
-                    std::io::ErrorKind::WouldBlock => continue,
-                    _ => {
-                        return Err(err)
-                    }
-                }
-            },
-        }
-    }
-
-    Ok(())
-}
+use radar::Radar;
 
 fn process(socket: UnixStream) {
     println!("create new process");
-    let mut msgs = vec!["hoge1", "hoge2"];
 
-    let f = Interval::new(Instant::now(), Duration::from_millis(2000))
-        .for_each(move |instant| {
-            if let Some(msg) = msgs.pop() {
-                println!("fire; instant={:?}", instant);
-                match send_data(&socket, msg) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err(timer::Error::shutdown()),
-                }
-            } else {
-                Err(timer::Error::shutdown())
-            }
-        })
-        .map_err(|e| {
-            println!("process error: {:?}", e);
-        });
+    let radar = Radar::new(socket);
 
-    tokio::spawn(f);
+    tokio::spawn(radar.map(|_| {
+        println!("in map");
+        }).map_err(|_| {
+        println!("in panic");
+        panic!("")}
+    ));
 }
 
 fn main() {
