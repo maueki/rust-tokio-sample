@@ -1,5 +1,4 @@
 use std;
-
 struct StatusPacket {
     cnt: u8,
     err: u8,
@@ -58,7 +57,8 @@ impl ItemPacket {
     }
 }
 
-struct ItemDetailPacket {
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct ItemDetailPacket {
     x: f32,
     y: f32,
     vx: f32,
@@ -67,6 +67,12 @@ struct ItemDetailPacket {
 }
 
 impl ItemDetailPacket {
+    #[test]
+    pub fn new(x: f32, y: f32, vx: f32, vy: f32, sync_counter: u8) -> Self {
+        ItemDetailPacket{x: x, y: y, vx: vx, vy: vy,
+                         sync_counter: sync_counter}
+    }
+
     fn serialize(&self) -> [u8; 8] {
         assert!(self.x >= -128f32 && self.x <= 127f32);
         assert!(self.y >= -128f32 && self.y <= 127f32);
