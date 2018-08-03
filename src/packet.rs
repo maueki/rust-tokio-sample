@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std;
 struct StatusPacket {
     cnt: u8,
@@ -67,7 +69,6 @@ pub struct ItemDetailPacket {
 }
 
 impl ItemDetailPacket {
-    #[test]
     pub fn new(x: f32, y: f32, vx: f32, vy: f32, sync_counter: u8) -> Self {
         ItemDetailPacket{x: x, y: y, vx: vx, vy: vy,
                          sync_counter: sync_counter}

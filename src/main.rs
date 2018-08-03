@@ -1,5 +1,4 @@
 extern crate tokio;
-#[macro_use]
 extern crate futures;
 extern crate tokio_timer;
 extern crate tokio_uds;
@@ -11,17 +10,16 @@ extern crate serde_derive;
 mod packet;
 mod data;
 
-use tokio::io::{self, Error};
+use tokio::io::Error;
 use tokio_uds::{UnixListener, UnixStream};
 use tokio::prelude::*;
 use tokio::timer::{self, Interval};
-use futures::future;
 
 use std::time::{Duration, Instant};
 
 fn send_data(mut socket: &UnixStream, msg: &str) -> Result<(), Error> {
     loop {
-        let msg = (msg.to_string() + &"\r\n".to_string());
+        let msg = msg.to_string() + &"\r\n".to_string();
         match socket.write(msg.as_bytes()) {
             Ok(_) => break,
             Err(err) => {
@@ -39,7 +37,7 @@ fn send_data(mut socket: &UnixStream, msg: &str) -> Result<(), Error> {
     Ok(())
 }
 
-fn process(mut socket: UnixStream) {
+fn process(socket: UnixStream) {
     println!("create new process");
     let mut msgs = vec!["hoge1", "hoge2"];
 
@@ -49,7 +47,7 @@ fn process(mut socket: UnixStream) {
                 println!("fire; instant={:?}", instant);
                 match send_data(&socket, msg) {
                     Ok(_) => Ok(()),
-                    Err(e) => Err(timer::Error::shutdown()),
+                    Err(_) => Err(timer::Error::shutdown()),
                 }
             } else {
                 Err(timer::Error::shutdown())

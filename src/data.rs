@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 
 use csv::{self, StringRecord};
 
@@ -8,7 +9,7 @@ use std::slice::Iter;
 
 use packet::ItemDetailPacket;
 
-struct CanData {
+pub struct CanData {
     records: Vec<Vec<Option<ItemDetailPacket>>>,
 }
 
@@ -29,7 +30,7 @@ fn deserialize(record: StringRecord) -> Vec<Option<ItemDetailPacket>> {
 }
 
 impl CanData {
-    fn new(csv_path: String) -> Result<Self, Box<Error>> {
+    pub fn new(csv_path: String) -> Result<Self, Box<Error>> {
         let file = File::open(csv_path)?;
         let mut reader = csv::ReaderBuilder::new()
             .has_headers(false)
@@ -45,12 +46,12 @@ impl CanData {
         Ok(CanData{records: rds})
     }
 
-    fn iter(&self) -> CanDataIterator {
+    pub fn iter(&self) -> CanDataIterator {
         CanDataIterator{iter: self.records.iter()}
     }
 }
 
-struct CanDataIterator<'a> {
+pub struct CanDataIterator<'a> {
     iter: Iter<'a, Vec<Option<ItemDetailPacket>>>,
 }
 
